@@ -1,0 +1,91 @@
+abbr[title],
+acronym[title] {
+border-bottom: 0.095em dotted #3B759E;
+cursor: help;
+}
+h1 abbr[title],
+h1 acronym[title],
+h2 abbr[title],
+h2 acronym[title] {
+border-bottom:0 none;
+}
+.reveal section img.no-border {
+border:0 none;
+box-shadow:none;
+}
+p.tweet-me {
+text-align:center;
+padding-top:1.25em;
+}
+.reveal section .tweet-me img {
+display:block;
+margin:0 auto;
+}
+.reveal p.via {
+font-size:75%;
+font-style:italic;
+padding-top:0.5em;
+}
+
+body.print-pdf img.stretch {
+max-width:75%;
+}
+
+table {
+width:80%;
+}
+.reveal table th,
+.reveal table td {
+padding:0.1em 0.25em;
+}
+table .highlight td {
+background-color:yellow;
+}
+
+div.tweet {
+margin:15px auto;
+width:50%;
+}
+
+/* Animating full-screen images to scroll automagically */
+.reveal .slides > section.full-bleed a {
+display: block;
+min-height: 640px
+}
+
+.reveal .slide-background {
+background-position: 0 100%
+}
+
+.slide-background.present[data-background-hash*=autoscroll] {
+background-position: 0 0;
+-webkit-animation: animatedBackground 55s 3.5s infinite ease alternate;
+-moz-animation: animatedBackground 55s 3.5s infinite ease alternate;
+-o-animation: animatedBackground 55s 3.5s infinite ease alternate;
+animation: animatedBackground 55s 3.5s infinite ease alternate;
+}
+
+@-webkit-keyframes animatedBackground {
+	0% {
+        background-position: 0 0;
+        }
+	100% {
+        background-position: 0 100%;
+        }
+}
+@-moz-keyframes animatedBackground {
+	0% {
+        background-position: 0 0;
+        }
+	100% {
+        background-position: 0 100%;
+    }
+}
+@keyframes animatedBackground {
+    0% {
+        background-position: 0 0;
+        }
+	100% {
+        background-position: 0 100%;
+        }
+}
