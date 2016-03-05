@@ -14,7 +14,7 @@
 
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+		<link rel="stylesheet" href="reveal.js/css/reveal.css">
 		<link rel="stylesheet" href="reveal.js/css/theme/sky.css" id="theme">
 		<link rel="stylesheet" href="css/overrides.css">
 
@@ -38,13 +38,477 @@
 			<!-- Any section element inside of this container is displayed as a slide -->
 
 			<div class="slides">
-				<section></section>
+				<section>
+					<h1>Searching for a Better WordPress Search</h1>
+				</section>
+				<section>
+					<h2>Follow Along</h2>
+					<a href="#">Link to Shortlink</a>
+				</section>
+				<section>
+					<h2>What This Talk Will Cover</h2>
+					<ul>
+						<li class="fragment">What&rsquo;s Wrong with Search</li>
+						<li class="fragment">Plugins &amp; Services to Improve Search</li>
+						<li class="fragment">Q&amp;A</li>
+					</ul>
+				</section>
+				<section>
+					<h2>About Me</h2>
+					<img src="img/russell-heimlich-on-pogo-stick.jpg" alt="Russell Heimlich on a pogo stick in a suit" style="width:38%;">
+				</section>
+				<section>
+					<h3>I&rsquo;ve been playing with WordPress since 2007</h3>
+					<a href="http://www.russellheimlich.com/blog/the-first-one/"><img src="img/russell-heimlichs-first-blog-post.png" alt="Screenshot of Russell Heimlich's first blog post" style="width:75%;"></a>
+				</section>
+				<section>
+					<h3>Work at Forum One</h3>
+					<a href="http://forumone.com/"><img src="img/forum-one-extend-your-influence.png" alt="Forum One: Extend Your Influence"></a>
+				</section>
+				<section>
+					<h3>I joined Twitter before @twitter Joined Twitter</h3>
+					<a href="https://twitter.com/kingkool68/status/560885747893669889"><img src="img/joining-twitter-before-twitter.jpg" alt="@kingkool68 joined Twitter in December 2006, @twitter joined February 2007"></a>
+				</section>
+				<section>
+					<h3>When I&rsquo;m not coding&hellip;</h3>
+					<a href="https://www.zadieheimlich.com/"><img src="img/zadie-in-a-wordpress-onesie.jpg" alt="Zadie wearing a WordPress onesie" style="width:50%;"></a>
+				</section>
+				<section>
+					<h1>What&rsquo;s Wrong with Search?</h1>
+				</section>
+				<section>
+					<h2>Common Complaints of WordPress&rsquo; Search</h2>
+					<ul>
+						<li class="fragment">Slow</li>
+						<li class="fragment">No options/customizations</li>
+						<li class="fragment"><strong>Irrelevant results</strong></li>
+					</ul>
+				</section>
+				<section>
+					<h2>Search is Hard!</h2>
+					<ul>
+						<li class="fragment">Look through all posts in the database</li>
+						<li class="fragment">Find posts matching keyword(s)</li>
+						<li class="fragment">Determine most relevant results</li>
+						<li class="fragment">Output results via a template</li>
+						<li class="fragment">Do all of this in <strong>under a few seconds!</strong></li>
+					</ul>
+				</section>
+				<section>
+					<h2>WordPress is designed for broad compatibility</h2>
+					<ul>
+						<li class="fragment">&ldquo;It just works&rdquo; under all kinds of server configurations</li>
+						<li class="fragment">Commodity hardware can be slow/constrained</li>
+						<li class="fragment">MySQL <em>is not</em> a search engine</li>
+					</ul>
+				</section>
+				<section>
+					<h2>WordPress <em>is not</em> a search engine!</h2>
+					<a href="https://www.facebook.com/groups/advancedwp/permalink/1101038453291701/?comment_id=1101135413282005&reply_comment_id=1101398249922388&comment_tracking=%7B%22tn%22%3A%22R8%22%7D"><img src="img/wordpress-is-not-asearch-engine-quote.png" alt="Bottom line: WordPress is not a search engine. If you need a real search engine, use one and use a plugin to enable it. Default search is going to be default, always. Basic. Works everywhere. Lowest common denominator."></a>
+				</section>
+				<section>
+					<h1>How Does a WordPress Search Work?</h1>
+				</section>
+				<section>
+					<h2>Pre 3.7</h2>
+					<p>Search for &ldquo;term&rdquo;</p>
+					<pre><code>SELECT SQL_CALC_FOUND_ROWS wp_posts.id
+FROM   wp_posts
+WHERE  1 = 1
+       AND (( ( wp_posts.post_title LIKE '%term%' )
+               OR ( wp_posts.post_content LIKE '%term%' ) ))
+       AND wp_posts.post_type IN ( 'post', 'page', 'attachment' )
+       AND ( wp_posts.post_status = 'publish'
+              OR wp_posts.post_author = 1
+                 AND wp_posts.post_status = 'private' )
+ORDER  BY wp_posts.post_date DESC
+LIMIT  0, 10 </code></pre>
+				</section>
+				<section>
+					<ol>
+						<li>Find posts where the post title or the post content contains &ldquo;term&rdquo;</li>
+						<li>Sort the results by post date in descending order (reverse chronological)</li>
+					</ol>
+				</section>
+				<section>
+					<p>Search for &ldquo;search term&rdquo;</p>
+					<pre><code>SELECT SQL_CALC_FOUND_ROWS wp_posts.id
+FROM   wp_posts
+WHERE  1 = 1
+       AND ( ( ( wp_posts.post_title LIKE '%search%' )
+                OR ( wp_posts.post_content LIKE '%search%' ) )
+             AND ( ( wp_posts.post_title LIKE '%term%' )
+                    OR ( wp_posts.post_content LIKE '%term%' ) ) )
+       AND wp_posts.post_type IN ( 'post', 'page', 'attachment' )
+       AND ( wp_posts.post_status = 'publish'
+              OR wp_posts.post_author = 1
+                 AND wp_posts.post_status = 'private' )
+ORDER  BY wp_posts.post_date DESC
+LIMIT  0, 10 </code></pre>
+				</section>
+				<section>
+					<ol>
+						<li>Find posts where&hellip;
+							<ol>
+								<li>the post title or the post content contains &ldquo;search&rdquo;</li>
+								<li><em>AND</em> the post title or the post content contains &ldquo;term&rdquo;</li>
+							</ol>
+						</li>
+						<li>Sort the results by post date in descending order (reverse chronological)</li>
+					</ol>
+				</section>
+				<section>
+					<h2>Trac Ticket #7394</h2>
+					<a href="https://core.trac.wordpress.org/ticket/7394"><img src="img/screenshot-of-trac-ticket-7394.png" alt="Screenshot of Trac ticket #7394 titled Search: order results by relevance"></a>
+				</section>
+				<section>
+					<h2>Sorting Search by Relevance</h2>
+					<p>A long time in the making&hellip;</p>
+					<ul>
+						<li class="fragment">Opened July 24, 2008</li>
+						<li class="fragment">Closed October 2, 2013</li>
+						<li class="fragment">5 Years, 2 months, 8 days!</li>
+					</ul>
+				</section>
+				<section>
+					<a href="img/wordpress-2.6-new-post-interface.png"><img src="img/wordpress-2.6-new-post-interface.png" alt="Screenshot of the New Post admin interface for WordPress version 2.6"></a>
+				</section>
+				<section>
+					<h2>From WordPress 3.7 and later searches are sorted by relevancy by default</h2>
+					<p class="fragment">(except for feeds)</p>
+				</section>
+				<section>
+					<h2>The ordering logic is as follows:</h2>
+					<p>via <a href="https://core.trac.wordpress.org/changeset/25632">Changeset 25632</a></p>
+					<ul>
+						<li class="fragment">Full sentence matches in post titles</li>
+						<li class="fragment">All search terms in post titles</li>
+						<li class="fragment">Any search terms in post titles</li>
+						<li class="fragment">Full sentence matches in post content</li>
+					</ul>
+				</section>
+				<section>
+					<p>Search for &ldquo;term&rdquo;</p>
+					<pre><code>SELECT SQL_CALC_FOUND_ROWS wp_3_posts.id
+FROM   wp_3_posts
+WHERE  1 = 1
+       AND (( ( wp_3_posts.post_title LIKE '%term%' )
+               OR ( wp_3_posts.post_content LIKE '%term%' ) ))
+       AND wp_3_posts.post_type IN ( 'post', 'page', 'attachment' )
+       AND ( wp_3_posts.post_status = 'publish'
+              OR wp_3_posts.post_status = 'private' )
+ORDER  BY wp_3_posts.post_title LIKE '%term%' DESC,
+          wp_3_posts.post_date DESC
+LIMIT  0, 10 </code></pre>
+				</section>
+				<section>
+					<ol>
+						<li>Find posts where the post title or the post content contains &ldquo;term&rdquo;</li>
+						<li>Sort the results by&hellip;
+							<ol>
+								<li>posts where the post tile contains &ldquo;term&rdquo;</li>
+								<li>post date in descending order (reverse chronological)</li>
+							</ol>
+						</li>
+					</ol>
+				</section>
+				<section>
+					<p>Search for &ldquo;search term&rdquo;</p>
+					<pre><code>SELECT SQL_CALC_FOUND_ROWS wp_3_posts.id
+FROM   wp_3_posts
+WHERE  1 = 1
+       AND ( ( ( wp_3_posts.post_title LIKE '%search%' )
+                OR ( wp_3_posts.post_content LIKE '%search%' ) )
+             AND ( ( wp_3_posts.post_title LIKE '%term%' )
+                    OR ( wp_3_posts.post_content LIKE '%term%' ) ) )
+       AND wp_3_posts.post_type IN ( 'post', 'page', 'attachment' )
+       AND ( wp_3_posts.post_status = 'publish'
+              OR wp_3_posts.post_status = 'private' )
+ORDER  BY ( CASE
+              WHEN wp_3_posts.post_title LIKE '%search term%' THEN 1
+              WHEN wp_3_posts.post_title LIKE '%search%'
+                   AND wp_3_posts.post_title LIKE '%term%' THEN 2
+              WHEN wp_3_posts.post_title LIKE '%search%'
+                    OR wp_3_posts.post_title LIKE '%term%' THEN 3
+              WHEN wp_3_posts.post_content LIKE '%search term%' THEN 4
+              ELSE 5
+            end ),
+          wp_3_posts.post_date DESC
+LIMIT  0, 10 </code></pre>
+				</section>
+				<section>
+					<ol>
+						<li>Find posts where&hellip;
+							<ol>
+								<li>the post title or the post content contains &ldquo;search&rdquo;</li>
+								<li><em>AND</em> the post title or the post content contains &ldquo;term&rdquo;</li>
+							</ol>
+						</li>
+						<li>Sort the results by&hellip;
+							<ol>
+								<li class="fragment">posts that contain &ldquo;search term&rdquo; in the post title</li>
+								<li class="fragment">posts that contain &ldquo;search&rdquo; <em>AND</em> &ldquo;term&rdquo; in the post title</li>
+								<li class="fragment">posts that contain &ldquo;search&rdquo; <em>OR</em> &ldquo;term&rdquo; in the post title</li>
+								<li class="fragment">posts that contain &ldquo;search term&rdquo; in the post content</li>
+								<li class="fragment">post date in descending order (reverse chronological)</li>
+							</ol>
+						</li>
+					</ol>
+				</section>
+				<section data-background="img/homer-confused.gif">
+					<h1 style="color:#fff;">GIF Break</h1>
+				</section>
+				<section data-background="img/cat-pizza-game-over.gif"></section>
+				<section data-background="img/corgi-vacuum.gif"></section>
+				<section data-background="img/pizza-cowboy.gif"></section>
+				<section data-background="img/crazy-computer-hands.gif"></section>
+				<section data-background="img/crazy-pills.gif"></section>
+				<section data-background="img/yeah.gif"></section>
+				<section>
+					<h1>Plugins</h1>
+				</section>
+				<section id="relevanssi">
+					<a href="https://wordpress.org/plugins/relevanssi/"><img src="img/screenshot-of-relevanssi-plugin-page.png" alt="Screenshot of Relevannsi plugin page"></a>
+				</section>
+				<section>
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Search custom post types, terms, fields</li>
+						<li class="fragment">Lots of options to tweak</li>
+						<li class="fragment">Search query logging</li>
+						<li class="fragment">Free and Premium versions</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">Extra load on your server</li>
+						<li class="fragment">Performance issues with larger amounts of content</li>
+						<li class="fragment">Hard to remember how to spell</li>
+					</ul>
+				</section>
+				<section id="searchwp">
+					<a href="https://searchwp.com"><img src="img/searchwp.png" alt="Screenshot of SearchWP website"></a>
+				</section>
+				<section>
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Native to WordPress</li>
+						<li class="fragment">Configurable through wp-admin</li>
+						<li class="fragment">Search stats</li>
+						<li class="fragment">bbPress integration</li>
+						<li class="fragment">PDF Indexing</li>
+						<li class="fragment">Multiple Search Engines</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">Extra load on your server</li>
+					</ul>
+				</section>
+				<section id="google-search-for-work">
+					<a href="https://wordpress.org/plugins/google-cse/"><img src="img/screenshot-of-google-custom-search-engine-plugin-page.png" alt="Screenshot of Google custom search engine plugin page"></a>
+				</section>
+				<section>
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Integrates with your theme</li>
+						<li class="fragment">Index is built through crawling</li>
+						<li class="fragment">Multisite support</li>
+						<li class="fragment">Ad free</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">Pricing</li>
+						<li class="fragment">Cap on queries per year</li>
+						<li class="fragment">Google&rsquo;s Developer Console is confusing</li>
+					</ul>
+				</section>
+				<section>
+					<a href="https://www.google.com/work/search/products/gss.html#pricing_content"><img src="img/google-custom-search-pricing.png" alt="Pricing breakdown of Google Custom Search: $100/year for 20,000 queries through $2,000/year for 500,000 queries"></a>
+				</section>
+				<section id="swiftype">
+					<a href="https://wordpress.org/plugins/swiftype-search/"><img src="img/screenshot-of-swiftype-plugin-page.png" alt="Screenshot of Swiftype plugin page"></a>
+				</section>
+				<section>
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Drag and drop to reorder results</li>
+						<li class="fragment">PDF indexing</li>
+						<li class="fragment">Faceted Search</li>
+						<li class="fragment">Analytics</li>
+						<li class="fragment">Developer API</li>
+						<li class="fragment">Two ways to build search index: web crawler or API</li>
+						<li class="fragment">No hardware to manage</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">Pricing ($249/month or $2,988/year)</li>
+						<li class="fragment">Top-query report is enterprise only</li>
+					</ul>
+				</section>
+				<section id="gsa">
+					<a href="https://www.google.com/work/search/products/gsa.html"><img src="img/google-search-appliance.png" alt="A yellow rack server that looks like a piece of cheese"></a>
+				</section>
+				<section>
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Your own mini-Google</li>
+						<li class="fragment">Self-learning Ranking</li>
+						<li class="fragment"><a href="https://www.google.com/support/enterprise/static/gsa/docs/admin/70/gsa_doc_set/xml_reference/results_format.html#1078416">XML version of results</a></li>
+						<li class="fragment">OneBox support (i.e. &ldquo;weather 90210&rdquo; returns weather results )</li>
+						<li class="fragment">Search behind a firewall or authentication</li>
+						<li class="fragment">Index 220 content types (PDF, Microsoft Office, databases)</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">&ldquo;If you have to ask you probably can&rsquo;t afford it&rdquo; pricing</li>
+						<li class="fragment">Manage Google-provided hardware</li>
+						<li class="fragment">Highly technical</li>
+						<li class="fragment">No WordPress plugin</li>
+						<li class="fragment"><a href="http://fortune.com/2016/02/04/google-ends-search-appliance/">End of life 2017</a></li>
+					</ul>
+				</section>
+				<section id="screw-it-just-use-google">
+					<h3>Screw It! Just Use Google</h3>
+					<a href="https://github.com/kingkool68/wordpress-screw-it-just-use-google"><img src="img/screw-it-just-use-google-demo.gif" alt="Searches on my blog redirect to Google"></a>
+				</section>
+				<section>
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Easy</li>
+						<li class="fragment">Free (<a href="https://github.com/kingkool68/wordpress-screw-it-just-use-google">GitHub Repo</a>)</li>
+						<li class="fragment">No maintenance</li>
+						<li class="fragment">Just as good as Google</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">No customizations</li>
+						<li class="fragment">Linking off your site</li>
+						<li class="fragment">Not professional?</li>
+					</ul>
+				</section>
+				<section>
+					<h3>Except <a href="http://mobile.reuters.com/">mobile.reuters.com</a> did this!</h3>
+					<img src="img/screenshot-of-mobile-reuters.jpg" alt="Screnshot of mobile.reuters.com" style="max-width:25%;">
+				</section>
+				<section id="elasticpress">
+					<a href="https://wordpress.org/plugins/elasticpress/"><img src="img/screenshot-of-elasticpress-plugin-page.png" alt="Screenshot of ElasticPress plugin page"></a>
+				</section>
+				<section>
+					<h2>Pros</h2>
+					<ul>
+						<li class="fragment">Super Flexible</li>
+						<li class="fragment">Integrates with WP_Query</li>
+						<li class="fragment">Faceted Search</li>
+						<li class="fragment">Multisite Support</li>
+						<li class="fragment">Proximity/Geograpic Queries</li>
+						<li class="fragment">Free (plugin &amp; Elasticsearch software)</li>
+						<li class="fragment"><a href="https://github.com/10up/ElasticPress">Open Source</a></li>
+					</ul>
+				</section>
+				<section>
+					<h2>Cons</h2>
+					<ul>
+						<li class="fragment">WP-CLI required</li>
+						<li class="fragment">Server management required</li>
+						<li class="fragment">Highly technical</li>
+						<li class="fragment">Aimed at developers</li>
+					</ul>
+				</section>
+				<section>
+					<h2>Setting up Elasticsearch &amp; ElasticPress</h2>
+				</section>
+				<section>
+					<h2>Set-up Elasticsearch</h2>
+					<ul>
+						<li><a href="https://aws.amazon.com/elasticsearch-service/">Amazon&rsquo;s Elasticsearch service</a> ($15-30/month)</li>
+						<li><a href="https://www.elastic.co/cloud">Elastic Cloud Standard</a> ($45/month)</li>
+						<li><a href="https://qbox.io/pricing">Qbox.io</a> ($12.50/month)</li>
+						<li><a href="https://www.digitalocean.com/pricing/">Digital Ocean Droplet</a>* ($5/month)</li>
+					</ul>
+
+					<p class="fragment">* Don&rsquo;t forget to <a href=""https://brudtkuhl.com/securing-elasticsearch/>secure Elasticsearch</a></p>
+				</section>
+				<section>
+					<h2>Install Plugin and WP-CLI</h2>
+					<ul>
+						<li>See the <a href="https://wordpress.org/plugins/elasticpress/">ElasticPress plugin page</a></li>
+						<li>See <a href="http://wp-cli.org/">WP-CLI.org</a></li>
+					</ul>
+				</section>
+				<section>
+					<h2>Define the address of your Elasticsearch instance</h2>
+					<p>Add the following to wp-config.php with the IP address (and port) of your Elasticsearch instance:</p>
+					<pre><code class="php">define( 'EP_HOST', 'http://192.168.1.2:9200' );</code></pre>
+				</section>
+				<section>
+					<h2>Start the initial sync</h2>
+					<p>Single site <pre><code class="bash">wp elasticpress index --setup</code></pre></p>
+					<p>Multisite <pre><code class="bash">wp elasticpress index --setup --network-wide</code></pre></p>
+				</section>
+				<section data-background="img/comuter-kid-thumbs-up.gif"></section>
+				<section>
+					<h1>Which one is right for me?</h1>
+				</section>
+				<section>
+					<h2>Small Scale/Low Budget</h2>
+					<ul>
+						<li><a href="#/screw-it-just-use-google">Screw it! Just Use Google!</a></li>
+						<li><a href="#/relevanssi">Relevanssi</a></li>
+						<li><a href="#/searchwp">SearchWP</a></li>
+					</ul>
+				</section>
+				<section>
+					<h2>Medium Scale/Small Business</h2>
+					<ul>
+						<li><a href="#/google-search-for-work">Google for Work/Google Custom Search Engine</a></li>
+					</ul>
+				</section>
+				<section>
+					<h2>Large Scale/Enterprise</h2>
+					<ul>
+						<li><a href="#/google-search-for-work">Google for Work/Google Custom Search Engine</a></li>
+						<li><a href="#/swiftype">Swiftype</a></li>
+						<li><a href="#/gsa">Google Search Appliance</a></li>
+						<li><a href="#/elasticpress">ElasticPress</a></li>
+					</ul>
+				</section>
+				<section>
+					<h2>Heavy Customization</h2>
+					<ul>
+						<li><a href="#/swiftype">Swiftype</a></li>
+						<li><a href="#/elasticpress">ElasticPress</a></li>
+					</ul>
+				</section>
+				<section>
+					<h1>Wrapping up!</h1>
+				</section>
+				<section>
+						<h3 class="fragment">Search is hard</h3>
+						<h3 class="fragment">WordPress is <em>not</em> a search engine</h3>
+						<h3 class="fragment">But there are lots of ways to enhance your site&rsquo;s search</h3>
+				</section>
+				<section>
+					<h1>Thank You!</h1>
+					<p class="tweet-me"><a href="https://twitter.com/kingkool68"><img src="img/twitter-logo.svg" class="no-border" alt="Tweet me!"> @kingkool68</a></p>
+					<h2 class="fragment">Questions?</h2>
+				</section>
 			</div>
 
 		</div>
 
 		<script src="reveal.js/lib/js/head.min.js"></script>
-		<script src="reveal.js/js/reveal.min.js"></script>
+		<script src="reveal.js/js/reveal.js"></script>
 
 		<script>
 
