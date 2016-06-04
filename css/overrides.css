@@ -21,3 +21,6 @@ p.tweet-me {
 	display: block;
 	margin: 0 auto;
 }
+.reveal del {
+	text-decoration: line-through;
+}
